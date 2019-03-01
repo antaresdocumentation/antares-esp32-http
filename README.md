@@ -1,8 +1,8 @@
-# Antares ESP8266 HTTP  
+# Antares ESP32 HTTP  
 <img src="http://i64.tinypic.com/2gsmuxc.jpg" width="300">  
-This is the documentation for Antares ESP8266 library.  
+This is the documentation for Antares ESP32 library.  
 
-This library is meant to simplify the process of retrieving and deploying data to Antares IoT Platform's REST API using ESP8266 with Arduino framework.  
+This library is meant to simplify the process of retrieving and deploying data to Antares IoT Platform's REST API using ESP32 with Arduino framework.  
 
 This library has been tested with Arduino ESP32 version 1.0.1.
 
@@ -25,22 +25,22 @@ Please note that `AntaresStoreSecure` and `AntaresGetLatestSecure` are preferred
 
 ## API Reference
 
-> Class `AntaresESP8266`  
+> Class `AntaresESP32`  
 
 All methods and properties need to be insantiated in order to use them.
 
 ### Constructor
-* `AntaresESP8266HTTP(String ACCESSKEY)`
-The constructor of class `AntaresESP8266HTTP`. Put your Antares account access key as the parameter. The access key should be an Arduino `String` datatype.
+* `AntaresESP32HTTP(String ACCESSKEY)`
+The constructor of class `AntaresESP32HTTP`. Put your Antares account access key as the parameter. The access key should be an Arduino `String` datatype.
 
 ### Get Latest Data
 * `void get(String projectName, String deviceName)`  
 **(Not recommended)** Fetch the latest data from your Antares project device through HTTP port 8080 (non-secure).   
-The data will be stored in the `jsonGetString` property of class `AntaresESP8266HTTP`  
+The data will be stored in the `jsonGetString` property of class `AntaresESP32HTTP`  
 
 * `void getSecure(String projectName, String deviceName)`  
 **(Recommended)** Fetch the latest data from your Antares project device through HTTPS port 8443 (secure).   
-The data will be stored in the `jsonGetString` property of class `AntaresESP8266HTTP`  
+The data will be stored in the `jsonGetString` property of class `AntaresESP32HTTP`  
 
 * `void getSuccess()`  
 Check if the latest data is successfully received.
@@ -59,17 +59,17 @@ Get `double` data by accessing the JSON `key` from `jsonGetString`.
 
 ### Store Data
 * `void add(String key, value)` or `void add(String key, String key2, value)`   
-Insert a JSON key-value data to the property `jsonString` of class `AntaresESP8266HTTP`. The `value` parameter is overloaded. The supported data types for the value parameter are:
+Insert a JSON key-value data to the property `jsonString` of class `AntaresESP32HTTP`. The `value` parameter is overloaded. The supported data types for the value parameter are:
     * `String`
     * `int`
     * `float`
     * `double`  
 
 * `void send(String projectName, String deviceName)`    
-**(Not recommended)** Send the data stored in `jsonString` property of class `AntaresESP8266HTTP` through HTTP port 8080 (non-secure).  
+**(Not recommended)** Send the data stored in `jsonString` property of class `AntaresESP32HTTP` through HTTP port 8080 (non-secure).  
 
 * `void sendSecure(String projectName, String deviceName)`  
-**(Recommended)** Send the data stored in `jsonString` property of class `AntaresESP8266HTTP` through HTTPS port 8443 (secure).  
+**(Recommended)** Send the data stored in `jsonString` property of class `AntaresESP32HTTP` through HTTPS port 8443 (secure).  
 
 <img src="https://upload.wikimedia.org/wikipedia/id/thumb/c/c4/Telkom_Indonesia_2013.svg/1200px-Telkom_Indonesia_2013.svg.png" width="200">  
 
