@@ -34,7 +34,7 @@ void setup() {
 
 void loop() {
   // Get the latest data from your Antares device
-  antares.get(projectName, deviceName);
+  antares.getSecure(projectName, deviceName);
 
   // Check if we're actually getting data
   if(antares.getSuccess()) {
