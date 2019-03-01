@@ -25,7 +25,7 @@ Please note that `AntaresStoreSecure` and `AntaresGetLatestSecure` are preferred
 
 ## API Reference
 
-> Class `AntaresESP32`  
+> Class `AntaresESP32HTTP`  
 
 All methods and properties need to be insantiated in order to use them.
 
