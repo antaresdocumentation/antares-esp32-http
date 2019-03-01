@@ -73,8 +73,4 @@ Insert a JSON key-value data to the property `jsonString` of class `AntaresESP32
 
 <img src="https://upload.wikimedia.org/wikipedia/id/thumb/c/c4/Telkom_Indonesia_2013.svg/1200px-Telkom_Indonesia_2013.svg.png" width="200">  
 
-**Powered by Telkom Indonesia**  
-
-<img src="https://upload.wikimedia.org/wikipedia/id/thumb/c/c4/Telkom_Indonesia_2013.svg/1200px-Telkom_Indonesia_2013.svg.png" width="200">  
-
-**Powered by Telkom Indonesia**  
+**Powered by Telkom Indonesia**
