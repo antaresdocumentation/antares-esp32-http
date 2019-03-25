@@ -58,12 +58,16 @@ public:
 
     /* Overloaded functions end */
     void send(String projectName, String deviceName); // Store data in buffer to database
-    void sendSecure(String projectName, String deviceName); // Store data in buffer to database
+    void sendRaw(String text, String projectName, String deviceName); // Store data in buffer to database
+    void sendRawNonSecure(String text, String projectName, String deviceName); // Store data in buffer to database
+    void sendNonSecure(String projectName, String deviceName); // Store data in buffer to database
     void printData(); // Print waiting list data to serial monitor
     String retrieveAllData(String projectName, String deviceName,int limit=0);
     String retrieveLatestData(String projectName, String deviceName);
     void get(String projectName, String deviceName);
-    void getSecure(String projectName, String deviceName);
+    String getRaw(String projectName, String deviceName);
+    String getRawNonSecure(String projectName, String deviceName);
+    void getNonSecure(String projectName, String deviceName);
     void getTest(String projectName, String deviceName);
     void getLatestTest(String projectName, String deviceName);
 

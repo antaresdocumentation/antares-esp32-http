@@ -4,7 +4,7 @@ AntaresESP32HTTP::AntaresESP32HTTP(String accessKey) {
     _accessKey = accessKey;
 }
 
-void AntaresESP32HTTP::get(String projectName, String deviceName) {
+void AntaresESP32HTTP::getNonSecure(String projectName, String deviceName) {
 
     jsonGetString = "";
     _getSuccess = false;
@@ -59,7 +59,7 @@ void AntaresESP32HTTP::get(String projectName, String deviceName) {
     _getSuccess = true;
 }
 
-void AntaresESP32HTTP::getSecure(String projectName, String deviceName) {
+void AntaresESP32HTTP::get(String projectName, String deviceName) {
 
     jsonGetString = "";
     _getSuccess = false;
@@ -117,11 +117,118 @@ void AntaresESP32HTTP::getSecure(String projectName, String deviceName) {
     _getSuccess = true;
 }
 
+String AntaresESP32HTTP::getRaw(String projectName, String deviceName) {
+
+    jsonGetString = "";
+    _getSuccess = false;
+    printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
+
+    // Use WiFiClient class to create TCP connections
+    WiFiClientSecure client;
+
+    client.setCACert(test_root_ca);
+
+    const int httpPort = 8443;
+    if (!client.connect(_serverChar, httpPort)) {
+        printDebug("[ANTARES] Connection failed!\n");
+        return "Conn failed";
+    }
+
+    // We now create a URI for the request
+    String url = "/~/antares-cse/antares-id/"+ projectName +"/"+ deviceName +"/la";
+
+    printDebug("Requesting URL: " + url + "\n");
+
+    // This will send the request to the server
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + _serverNoHttp + "\r\n" +
+                 "X-M2M-Origin: "+ _accessKey +"\r\n" +
+                 "Content-Type: application/json;ty=4\r\n" +
+                 "Accept: application/json\r\n" +
+                 "Connection: close\r\n\r\n");
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+            Serial.println("[ANTARES] Client Timeout !\n");
+            client.stop();
+            return "Timeout";
+        }
+    }
+
+    String payload = "";
+    // Read all the lines of the reply from server and print them to Serial
+    while(client.available()) {
+        while(client.read() != '{');
+        String line = "{";
+        line += client.readStringUntil('\r');
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& object = jsonBuffer.parseObject(line);
+        String receivedData = object["m2m:cin"]["con"];
+        payload = receivedData;
+    }
+
+    printDebug("\n[ANTARES] Closing connection...\n");
+    _getSuccess = true;
+    return payload;
+}
+
+String AntaresESP32HTTP::getRawNonSecure(String projectName, String deviceName) {
+    jsonGetString = "";
+    _getSuccess = false;
+    printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
+
+    // Use WiFiClient class to create TCP connections
+    WiFiClient client;
+
+    const int httpPort = 8443;
+    if (!client.connect(_serverChar, _portNum)) {
+        printDebug("[ANTARES] Connection failed!\n");
+        return "Conn failed";
+    }
+
+    // We now create a URI for the request
+    String url = "/~/antares-cse/antares-id/"+ projectName +"/"+ deviceName +"/la";
+
+    printDebug("Requesting URL: " + url + "\n");
+
+    // This will send the request to the server
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + _serverNoHttp + "\r\n" +
+                 "X-M2M-Origin: "+ _accessKey +"\r\n" +
+                 "Content-Type: application/json;ty=4\r\n" +
+                 "Accept: application/json\r\n" +
+                 "Connection: close\r\n\r\n");
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+            Serial.println("[ANTARES] Client Timeout !\n");
+            client.stop();
+            return "Timeout";
+        }
+    }
+
+    String payload = "";
+    // Read all the lines of the reply from server and print them to Serial
+    while(client.available()) {
+        while(client.read() != '{');
+        String line = "{";
+        line += client.readStringUntil('\r');
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& object = jsonBuffer.parseObject(line);
+        String receivedData = object["m2m:cin"]["con"];
+        payload = receivedData;
+    }
+
+    printDebug("\n[ANTARES] Closing connection...\n");
+    _getSuccess = true;
+    return payload;
+}
+
 bool AntaresESP32HTTP::getSuccess() {
     return _getSuccess;
 }
 
-void AntaresESP32HTTP::send(String projectName, String deviceName) {
+void AntaresESP32HTTP::sendNonSecure(String projectName, String deviceName) {
     printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
 
     // Use WiFiClient class to create TCP connections
@@ -196,7 +303,7 @@ void AntaresESP32HTTP::send(String projectName, String deviceName) {
     _currentKey = "";
 }
 
-void AntaresESP32HTTP::sendSecure(String projectName, String deviceName) {
+void AntaresESP32HTTP::send(String projectName, String deviceName) {
     printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
 
     // Use WiFiClient class to create TCP connections
@@ -244,6 +351,158 @@ void AntaresESP32HTTP::sendSecure(String projectName, String deviceName) {
         Serial.println(req);
     }
 
+
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+            Serial.println("[ANTARES] Client Timeout !\n");
+            client.stop();
+            return;
+        }
+    }
+
+    // Read all the lines of the reply from server and print them to Serial
+    String line = "";
+
+    while(client.available()) {
+        line += client.readStringUntil('\r');
+    }
+
+    // Check if response is successful
+    if(line.indexOf("HTTP/1.1 201 Created") >= 0) {
+        printDebug("[ANTARES] Created! Response: 201\n");
+    }
+    else {
+        printDebug("[ANTARES] Creating data failed!\n");
+    }
+
+    printDebug("\n[ANTARES] Closing connection...\n");
+    jsonString = "{}";
+    _currentKey = "";
+}
+
+void AntaresESP32HTTP::sendRaw(String text, String projectName, String deviceName) {
+    printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
+
+    // Use WiFiClient class to create TCP connections
+    WiFiClientSecure client;
+
+    client.setCACert(test_root_ca);
+
+    const int httpPort = 8443;
+    if (!client.connect(_serverChar, httpPort)) {
+        printDebug("[ANTARES] Connection failed!\n");
+        return;
+    }
+
+    // We now create a URI for the request
+    String url = "/~/antares-cse/antares-id/"+ projectName + "/" + deviceName;
+
+    jsonString.replace("\"", "\\\"");
+
+    String body;
+    body += "{";
+    body += "\"m2m:cin\": {";
+    body += "\"con\": \"" + text + "\"";
+    body += "}";
+    body += "}";
+
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& object = jsonBuffer.parseObject(body);
+
+    printDebug("Requesting URL: " + url + "\n");
+
+    String req = "";
+    req += "POST " + url + " HTTP/1.1\r\n";
+    req += "Host: " + _serverNoHttp + "\r\n";
+    req += "X-M2M-Origin: "+ _accessKey +"\r\n";
+    req += "Accept: application/json\r\n";
+    req += "Connection: close\r\n";
+    req += "Content-Type: application/json;ty=4\r\n";
+    req += "Content-Length:"+ String(body.length()) +"\r\n";
+    req += "\r\n";
+    req += body + "\r\n";
+
+    // This will send the request to the server
+    client.print(req);
+    if(_debug) {
+        Serial.println(req);
+    }
+
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+            Serial.println("[ANTARES] Client Timeout !\n");
+            client.stop();
+            return;
+        }
+    }
+
+    // Read all the lines of the reply from server and print them to Serial
+    String line = "";
+
+    while(client.available()) {
+        line += client.readStringUntil('\r');
+    }
+
+    // Check if response is successful
+    if(line.indexOf("HTTP/1.1 201 Created") >= 0) {
+        printDebug("[ANTARES] Created! Response: 201\n");
+    }
+    else {
+        printDebug("[ANTARES] Creating data failed!\n");
+    }
+
+    printDebug("\n[ANTARES] Closing connection...\n");
+    jsonString = "{}";
+    _currentKey = "";
+}
+
+void AntaresESP32HTTP::sendRawNonSecure(String text, String projectName, String deviceName) {
+    printDebug("[ANTARES] Connecting to " + _serverNoHttp + "\n");
+
+    // Use WiFiClient class to create TCP connections
+    WiFiClient client;
+
+    const int httpPort = 8443;
+    if (!client.connect(_serverChar, _portNum)) {
+        printDebug("[ANTARES] Connection failed!\n");
+        return;
+    }
+
+    // We now create a URI for the request
+    String url = "/~/antares-cse/antares-id/"+ projectName + "/" + deviceName;
+
+    jsonString.replace("\"", "\\\"");
+
+    String body;
+    body += "{";
+    body += "\"m2m:cin\": {";
+    body += "\"con\": \"" + text + "\"";
+    body += "}";
+    body += "}";
+
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& object = jsonBuffer.parseObject(body);
+
+    printDebug("Requesting URL: " + url + "\n");
+
+    String req = "";
+    req += "POST " + url + " HTTP/1.1\r\n";
+    req += "Host: " + _serverNoHttp + "\r\n";
+    req += "X-M2M-Origin: "+ _accessKey +"\r\n";
+    req += "Accept: application/json\r\n";
+    req += "Connection: close\r\n";
+    req += "Content-Type: application/json;ty=4\r\n";
+    req += "Content-Length:"+ String(body.length()) +"\r\n";
+    req += "\r\n";
+    req += body + "\r\n";
+
+    // This will send the request to the server
+    client.print(req);
+    if(_debug) {
+        Serial.println(req);
+    }
 
     unsigned long timeout = millis();
     while (client.available() == 0) {
@@ -470,21 +729,26 @@ bool AntaresESP32HTTP::wifiConnection(String SSID, String wifiPassword) {
     WiFi.begin(_wifiSSID, _wifiPass);
     printDebug("[ANTARES] Trying to connect to " + SSID + "...\n");
 
-    for (count=0;count<20;count++) {
+    // for (count=0;count<20;count++) {
+    //     delay(500);
+    //     printDebug(".");
+    // }
+
+    int counter = 0;
+    while(WiFi.status() != WL_CONNECTED) {
         delay(500);
         printDebug(".");
+        counter++;
+        if(counter >= 10) {
+            counter = 0;
+            printDebug("[ANTARES] Could not connect to " + SSID + "! Retrying...\n");
+        }
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-        printDebug("[ANTARES] Could not connect to " + SSID + ".\n");
-        return false;
-    }
-    else {
-        WiFi.setAutoReconnect(true);
-        printDebug("\n[ANTARES] WiFi Connected!\n");
-        printDebug("[ANTARES] IP Address: " + ipToString(WiFi.localIP()) + "\n");
-        return true;
-    }
+    WiFi.setAutoReconnect(true);
+    printDebug("\n[ANTARES] WiFi Connected!\n");
+    printDebug("[ANTARES] IP Address: " + ipToString(WiFi.localIP()) + "\n");
+    return true;
 }
 
 bool AntaresESP32HTTP::checkWifiConnection() {
